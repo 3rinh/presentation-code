@@ -1,0 +1,73 @@
+let people = [];
+let Data;
+let url;"https://docs.google.com/spreadsheets/d/e/2PACX-1vSUgLwAYITWEa_oIY_Mqj36gSKG78RpkVz_KFqY_FOVccLxjOdGASfH8XY4FABCeG8amHw5tCpkfOb6/pub?output=csv"
+async function setup() {
+   createCanvas(600, 800);
+   angleMode(DEGREES); //allows the code to read angles in degrees instead of radians which is the defult
+  //(dont really understand what radians is??)
+   //data = loadTable(url, ',', 'header');
+    Data = await loadTable (
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUgLwAYITWEa_oIY_Mqj36gSKG78RpkVz_KFqY_FOVccLxjOdGASfH8XY4FABCeG8amHw5tCpkfOb6/pub?output=csv",
+    "csv",
+    "header" );
+  peopleSlider = createSlider(0, table.getRowCount() -1, 0, 1); // min, max, start, change
+  peopleSlider.position(670, 100);
+  peopleSlider.style('width', '200px'); //changes how big the sider is
+}
+function draw() {
+  background(0);
+  // get selected row from slider
+  let rowIndex = peopleSlider.value();
+  // let selectedVolume = peopleSlider.value();
+  // //the selected volume is the same value of the slider (the sider selects the volume)
+     let selectedVolume = table.getNum(rowIndex, "number of people");
+if (people.length < selectedVolume) {
+  for (let i = people.length; i < selectedVolume; i++) {
+    // if the number of people is lower than the selected volume add one (makes them the same value)
+    people.push(new volume());
+    //brake down of: people.push(new volume()) - found online
+    //new volume calls on the class volume and it information
+    //people opens an "array"
+    //push add a new randomised cirles from the information in class volume to the opened array
+  }
+} if (people.length > selectedVolume) {
+  people.length = selectedVolume;
+} //if the number of people is larger than the selected volume, make them the same
+  let currentTime = frameCount / 60;
+  for (let volume of people) {
+    volume.update(currentTime);
+    volume.display();
+  }
+}
+// what do the "people"/ cirles look like and how do they move:
+class volume {
+  constructor() {
+    this.initialAngle = random(0, 360); //full circle (0,180) would be a half a circle
+    this.size = random(10, 15);
+    this.radius = random(120, width / 2); //where the "people" move with in the circle movement
+    //this.radius = random(0, width / 2); this would fill the whole circlular movment with circles
+    this.color = color(random(0, 255), random(0, 255), random(0, 255));
+    this.angularSpeed = random(2, 20); //controlls speed
+    this.direction = random(-1, 1);
+  }
+update(time) {
+    //let angularSpeed = 10;
+    //let angle = this.initialAngle + angularSpeed * time;
+    //speed of each circles become random + the direction
+    let angle = this.initialAngle + this.angularSpeed *this.direction* time;
+    //let direction = this.initialAngle + this.direction * time;
+   // where the circle sits on the page
+    let centerX = width / 2;
+    let centerY = height / 2;
+    // Circular motion maths (dont fully understand)
+    this.posX = centerX + this.radius * 1 * cos(angle); //this effect the shape horizontally
+    this.posY = centerY + this.radius * 1 * sin(angle); //this effects the shape verticly
+    //this.posX = centerX + this.radius * 1 * cos(direction); //this effect the shape horizontally
+    //this.posY = centerY + this.radius * 1 * sin(direction); //this effects the shape verticly
+}
+  display() {
+    fill(this.color);
+    noStroke();
+    ellipse(this.posX, this.posY, this.size);
+  }
+}
