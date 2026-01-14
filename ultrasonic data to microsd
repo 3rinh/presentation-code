@@ -1,0 +1,67 @@
+#include <SPI.h>
+#include <SD.h>
+// ----------- Pin Definitions -----------
+const int trigPin = 9;       // HC-SR04 TRIG
+const int echoPin = 8;       // HC-SR04 ECHO
+const int chipSelect = 10;   // SD card CS
+// ----------- Variables -----------
+File dataFile;
+void setup() {
+  Serial.begin(115200);
+  delay(2000); // Give Serial time to start
+  // Setup pins
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  // Make sure SD CS pin is HIGH before initialization
+  pinMode(chipSelect, OUTPUT);
+  digitalWrite(chipSelect, HIGH);
+  delay(50);
+  // Initialize SD card
+  Serial.print("Initializing SD card... ");
+  if (!SD.begin(chipSelect)) {
+    Serial.println("FAILED!");
+    Serial.println("Check wiring, CS pin, and SD card format.");
+    while (1); // Stop here if SD fails
+  }
+  Serial.println("SUCCESS!");
+  // Open CSV file (creates if doesn't exist)
+  dataFile = SD.open("data.csv", FILE_WRITE);
+  if (dataFile) {
+    // Write CSV header
+    dataFile.println("Time_ms,Distance_cm");
+    dataFile.close();
+    Serial.println("CSV header written.");
+  } else {
+    Serial.println("Failed to open data.csv for writing.");
+  }
+}
+void loop() {
+  // ----------- Measure distance -----------
+  long duration;
+  long distance;
+  // Send a 10 µs pulse to TRIG
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  // Read echo pulse duration
+  duration = pulseIn(echoPin, HIGH);
+  // Convert to distance in cm
+  distance = duration * 0.034 / 2;
+  // ----------- Print to Serial -----------
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+  // ----------- Write to SD Card -----------
+  dataFile = SD.open("data.csv", FILE_WRITE);
+  if (dataFile) {
+    dataFile.print(millis());  // time in ms
+    dataFile.print(",");
+    dataFile.println(distance);
+    dataFile.close();
+  } else {
+    Serial.println("Error writing to data.csv");
+  }
+  delay(500); // Wait 0.5 seconds between measurements
+}
