@@ -1,0 +1,26 @@
+int E1 = 9;  // PWM pin
+int M1 = 8;  // Direction pin
+
+void setup() {
+ pinMode(E1, OUTPUT);
+ pinMode(M1, OUTPUT);
+}
+
+void loop() {
+ // Move forward
+ digitalWrite(M1, HIGH);    // forward
+ analogWrite(E1, 255);      // PWM speed (0–255)
+ delay(17500);
+
+ analogWrite(E1, 0);
+ delay(10);
+
+ // Move backward
+ digitalWrite(M1, LOW);     // reverse direction
+ analogWrite(E1, 255);
+ delay(17500);
+
+ analogWrite(E1, 0);
+ delay(10);
+}
+
